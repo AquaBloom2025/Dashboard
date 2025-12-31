@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AquaBloom Mobile Console</title>
+
+<style>
+:root {
+  --bg: #0f1113;
+  --card: rgba(0,0,0,0.55);
+  --text: #e6e6e6;
+  --sub: #aaa;
+  --accent: #9ad1b3;
+  --border: #222;
+}
+
+.light {
+  --bg: #f4f6f7;
+  --card: #ffffff;
+  --text: #111;
+  --sub: #666;
+  --accent: #4fa384;
+  --border: #ddd;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter","Alibaba PuHuiTi",sans-serif;
+  transition: background 0.3s,color 0.3s;
+}
+
+header {
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+}
+
+header strong {
+  font-size: 18px;
+}
+
+.switches button {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 16px;
+  padding: 4px 10px;
+  margin-left: 6px;
+}
+
+main {
+  padding: 16px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.card h2 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.sub {
+  font-size: 13px;
+  color: var(--sub);
+}
+
+.device-btn {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 10px;
+}
+
+.device-btn strong {
+  display: block;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.status-item span {
+  font-size: 12px;
+  color: var(--sub);
+}
+
+.status-item strong {
+  font-size: 15px;
+}
+
+.tabs {
+  display: flex;
+  overflow-x: auto;
+  margin-bottom: 10px;
+}
+
+.tabs button {
+  flex: none;
+  margin-right: 8px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text);
+}
+
+.tabs button.active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+canvas {
+  width: 100%;
+  height: 220px;
+  background: var(--bg);
+  border-radius: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <strong>AquaBloom</strong>
+  <div class="switches">
+    <button onclick="toggleLang()">中 / EN</button>
+    <button onclick="toggleTheme()">🌙 / ☀️</button>
+  </div>
+</header>
+
+<main>
+
+<!-- 首页 -->
+<section id="home">
+  <div class="card">
+    <h2 class="lang-en">User</h2>
+    <h2 class="lang-cn" style="display:none">用户</h2>
+    <strong>Chen Yuxiang</strong>
+    <div class="sub">City Rainwater Account</div>
+  </div>
+
+  <div class="card">
+    <h2 class="lang-en">My Devices</h2>
+    <h2 class="lang-cn" style="display:none">名下设备</h2>
+
+    <button class="device-btn" onclick="openDevice()">
+      <strong>AB-RT-001</strong>
+      <div class="sub lang-en">Campus Roadside Unit</div>
+      <div class="sub lang-cn" style="display:none">校园道路绿化装置</div>
+    </button>
+
+    <button class="device-btn">
+      <strong>AB-RT-014</strong>
+      <div class="sub lang-en">Community Garden</div>
+      <div class="sub lang-cn" style="display:none">社区花园装置</div>
+    </button>
+  </div>
+</section>
+
+<!-- 设备界面 -->
+<section id="device" style="display:none">
+
+  <div class="card">
+    <h2>AB-RT-001</h2>
+    <div class="sub lang-en">Operating Status</div>
+    <div class="sub lang-cn" style="display:none">运行状态</div>
+
+    <div class="status-grid">
+      <div class="status-item">
+        <span>Mode</span>
+        <strong>Auto</strong>
+      </div>
+      <div class="status-item">
+        <span>Soil Moisture</span>
+        <strong>38 %</strong>
+      </div>
+      <div class="status-item">
+        <span>Water Level</span>
+        <strong>72 %</strong>
+      </div>
+      <div class="status-item">
+        <span>Valve</span>
+        <strong>Closed</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="lang-en">Water Saving Data</h2>
+    <h2 class="lang-cn" style="display:none">节水数据</h2>
+
+    <div class="tabs">
+      <button class="active" onclick="drawYear()">2025</button>
+      <button onclick="drawMonth()">Jan</button>
+      <button onclick="drawMonth()">Feb</button>
+      <button onclick="drawMonth()">Mar</button>
+      <button onclick="drawMonth()">Apr</button>
+      <button onclick="drawMonth()">May</button>
+      <button onclick="drawMonth()">Jun</button>
+    </div>
+
+    <canvas id="chart"></canvas>
+  </div>
+
+  <button class="device-btn" onclick="goBack()">← Back</button>
+
+</section>
+
+</main>
+
+<script>
+let isLight = false;
+let isCN = false;
+
+function toggleTheme(){
+  isLight = !isLight;
+  document.body.classList.toggle("light", isLight);
+}
+
+function toggleLang(){
+  isCN = !isCN;
+  document.querySelectorAll(".lang-en").forEach(e=>e.style.display = isCN?"none":"block");
+  document.querySelectorAll(".lang-cn").forEach(e=>e.style.display = isCN?"block":"none");
+}
+
+function openDevice(){
+  document.getElementById("home").style.display="none";
+  document.getElementById("device").style.display="block";
+  drawYear();
+}
+
+function goBack(){
+  document.getElementById("device").style.display="none";
+  document.getElementById("home").style.display="block";
+}
+
+const canvas = document.getElementById("chart");
+const ctx = canvas.getContext("2d");
+
+function drawAxes(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.strokeStyle = "#555";
+  ctx.beginPath();
+  ctx.moveTo(40,20);
+  ctx.lineTo(40,200);
+  ctx.lineTo(300,200);
+  ctx.stroke();
+}
+
+function drawYear(){
+  drawAxes();
+  const data=[120,180,90,210,160,200,140,100,80,60,40,30];
+  ctx.strokeStyle="#9ad1b3";
+  ctx.beginPath();
+  data.forEach((v,i)=>{
+    const x=40+i*20;
+    const y=200-v/2;
+    if(i===0) ctx.moveTo(x,y);
+    else ctx.lineTo(x,y);
+    ctx.arc(x,y,3,0,Math.PI*2);
+  });
+  ctx.stroke();
+}
+
+function drawMonth(){
+  drawAxes();
+  const data=[0,40,120,60,180,140,90];
+  ctx.strokeStyle="#9ad1b3";
+  ctx.beginPath();
+  data.forEach((v,i)=>{
+    const x=40+i*35;
+    const y=200-v;
+    if(i===0) ctx.moveTo(x,y);
+    else ctx.lineTo(x,y);
+    ctx.arc(x,y,3,0,Math.PI*2);
+  });
+  ctx.stroke();
+}
+</script>
+
+</body>
+</html>
