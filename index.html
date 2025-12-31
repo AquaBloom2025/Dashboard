@@ -1,300 +1,899 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AquaBloom Mobile Console</title>
-
-<style>
-:root {
-  --bg: #0f1113;
-  --card: rgba(0,0,0,0.55);
-  --text: #e6e6e6;
-  --sub: #aaa;
-  --accent: #9ad1b3;
-  --border: #222;
-}
-
-.light {
-  --bg: #f4f6f7;
-  --card: #ffffff;
-  --text: #111;
-  --sub: #666;
-  --accent: #4fa384;
-  --border: #ddd;
-}
-
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: "Inter","Alibaba PuHuiTi",sans-serif;
-  transition: background 0.3s,color 0.3s;
-}
-
-header {
-  padding: 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--border);
-}
-
-header strong {
-  font-size: 18px;
-}
-
-.switches button {
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--text);
-  border-radius: 16px;
-  padding: 4px 10px;
-  margin-left: 6px;
-}
-
-main {
-  padding: 16px;
-}
-
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 16px;
-  margin-bottom: 16px;
-}
-
-.card h2 {
-  margin: 0 0 8px;
-  font-size: 16px;
-}
-
-.sub {
-  font-size: 13px;
-  color: var(--sub);
-}
-
-.device-btn {
-  width: 100%;
-  text-align: left;
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--text);
-  border-radius: 12px;
-  padding: 14px;
-  margin-top: 10px;
-}
-
-.device-btn strong {
-  display: block;
-}
-
-.status-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 10px;
-}
-
-.status-item span {
-  font-size: 12px;
-  color: var(--sub);
-}
-
-.status-item strong {
-  font-size: 15px;
-}
-
-.tabs {
-  display: flex;
-  overflow-x: auto;
-  margin-bottom: 10px;
-}
-
-.tabs button {
-  flex: none;
-  margin-right: 8px;
-  padding: 6px 12px;
-  border-radius: 20px;
-  border: 1px solid var(--border);
-  background: none;
-  color: var(--text);
-}
-
-.tabs button.active {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-canvas {
-  width: 100%;
-  height: 220px;
-  background: var(--bg);
-  border-radius: 10px;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能雨水收集系统 - 三级时间视图切换</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0d1b2a, #1b263b);
+            min-height: 100vh;
+            color: #e0e1dd;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        h1 {
+            color: #6096ba;
+            margin-bottom: 10px;
+            font-size: 1.8em;
+        }
+        .subtitle {
+            color: #81c3d7;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+        .control-panel {
+            background: #1b263b;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #415a77;
+        }
+        .device-selector {
+            display: flex;
+            align-items: center;
+            margin: 10px;
+        }
+        .device-selector label {
+            margin-right: 10px;
+            font-weight: bold;
+            color: #e0e1dd;
+        }
+        .pump-control {
+            display: flex;
+            align-items: center;
+            margin: 10px;
+        }
+        .pump-control label {
+            margin-right: 10px;
+            font-weight: bold;
+            color: #e0e1dd;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #415a77;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: #e0e1dd;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #4CAF50;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .view-toggle {
+            display: flex;
+            align-items: center;
+            margin: 10px;
+        }
+        .view-toggle label {
+            margin-right: 10px;
+            font-weight: bold;
+            color: #e0e1dd;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            background-color: #415a77;
+            color: #e0e1dd;
+        }
+        .btn.active {
+            background-color: #6096ba;
+            color: white;
+        }
+        .btn.inactive {
+            background-color: #778da9;
+            color: #e0e1dd;
+        }
+        .sensor-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .sensor-card {
+            background: #1b263b;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            text-align: center;
+            border: 1px solid #415a77;
+        }
+        .sensor-title {
+            font-size: 1.2em;
+            color: #81c3d7;
+            margin-bottom: 10px;
+        }
+        .sensor-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #6096ba;
+        }
+        .sensor-unit {
+            font-size: 0.9em;
+            color: #778da9;
+        }
+        .chart-container {
+            width: 100%;
+            height: 40vh;
+            margin: 20px 0;
+            background: #1b263b;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            border: 1px solid #415a77;
+        }
+        .info-box {
+            background: #1b263b;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            text-align: left;
+            border: 1px solid #415a77;
+        }
+        .legend {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px 0;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 0 10px;
+            font-size: 0.9em;
+        }
+        .color-box {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            border-radius: 3px;
+        }
+        .precipitation-color {
+            background-color: #2196f3;
+        }
+        .collection-color {
+            background-color: #4caf50;
+        }
+        .chart {
+            width: 100%;
+            height: 100%;
+        }
+        .bar {
+            position: relative;
+            display: inline-block;
+            margin: 0 2px;
+            vertical-align: bottom;
+            cursor: pointer;
+        }
+        .bar-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: #e0e1dd;
+        }
+        .tooltip {
+            position: absolute;
+            background: rgba(26, 42, 64, 0.9);
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+            border: 1px solid #6096ba;
+        }
+        .y-axis-label {
+            position: absolute;
+            transform: rotate(-90deg);
+            left: -40px;
+            top: 50%;
+            font-size: 12px;
+            color: #e0e1dd;
+            text-align: center;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+        .status-on {
+            background-color: #4CAF50;
+        }
+        .status-off {
+            background-color: #f44336;
+        }
+        .breadcrumb {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px 0;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .breadcrumb-item {
+            padding: 5px 10px;
+            background-color: #415a77;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #e0e1dd;
+        }
+        .breadcrumb-item:hover {
+            background-color: #778da9;
+        }
+        .breadcrumb-item.active {
+            background-color: #6096ba;
+            color: white;
+        }
+        .breadcrumb-separator {
+            color: #e0e1dd;
+        }
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.5em;
+            }
+            .subtitle {
+                font-size: 1em;
+            }
+            .chart-container {
+                height: 45vh;
+            }
+            .control-panel {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
 </head>
-
 <body>
-
-<header>
-  <strong>AquaBloom</strong>
-  <div class="switches">
-    <button onclick="toggleLang()">中 / EN</button>
-    <button onclick="toggleTheme()">🌙 / ☀️</button>
-  </div>
-</header>
-
-<main>
-
-<!-- 首页 -->
-<section id="home">
-  <div class="card">
-    <h2 class="lang-en">User</h2>
-    <h2 class="lang-cn" style="display:none">用户</h2>
-    <strong>Chen Yuxiang</strong>
-    <div class="sub">City Rainwater Account</div>
-  </div>
-
-  <div class="card">
-    <h2 class="lang-en">My Devices</h2>
-    <h2 class="lang-cn" style="display:none">名下设备</h2>
-
-    <button class="device-btn" onclick="openDevice()">
-      <strong>AB-RT-001</strong>
-      <div class="sub lang-en">Campus Roadside Unit</div>
-      <div class="sub lang-cn" style="display:none">校园道路绿化装置</div>
-    </button>
-
-    <button class="device-btn">
-      <strong>AB-RT-014</strong>
-      <div class="sub lang-en">Community Garden</div>
-      <div class="sub lang-cn" style="display:none">社区花园装置</div>
-    </button>
-  </div>
-</section>
-
-<!-- 设备界面 -->
-<section id="device" style="display:none">
-
-  <div class="card">
-    <h2>AB-RT-001</h2>
-    <div class="sub lang-en">Operating Status</div>
-    <div class="sub lang-cn" style="display:none">运行状态</div>
-
-    <div class="status-grid">
-      <div class="status-item">
-        <span>Mode</span>
-        <strong>Auto</strong>
-      </div>
-      <div class="status-item">
-        <span>Soil Moisture</span>
-        <strong>38 %</strong>
-      </div>
-      <div class="status-item">
-        <span>Water Level</span>
-        <strong>72 %</strong>
-      </div>
-      <div class="status-item">
-        <span>Valve</span>
-        <strong>Closed</strong>
-      </div>
+    <div class="container">
+        <h1>智能雨水收集系统 - 三级时间视图切换</h1>
+        <div class="subtitle">设备协同工作与实时水质监测</div>
+        
+        <div class="control-panel">
+            <div class="device-selector">
+                <label>选择设备:</label>
+                <select id="deviceSelect">
+                    <option value="device1">设备 #1 (收集区 A)</option>
+                    <option value="device2">设备 #2 (收集区 B)</option>
+                    <option value="device3">设备 #3 (收集区 C)</option>
+                </select>
+            </div>
+            <div class="pump-control">
+                <label>水泵开关:</label>
+                <label class="switch">
+                    <input type="checkbox" id="pumpSwitch">
+                    <span class="slider"></span>
+                </label>
+                <span id="pumpStatus" class="status-indicator status-off"></span>
+            </div>
+        </div>
+        
+        <div class="breadcrumb">
+            <div id="yearBreadcrumb" class="breadcrumb-item active">2025年</div>
+            <div class="breadcrumb-separator">></div>
+            <div id="monthBreadcrumb" class="breadcrumb-item">6月</div>
+            <div class="breadcrumb-separator">></div>
+            <div id="dayBreadcrumb" class="breadcrumb-item">日视图</div>
+        </div>
+        
+        <div class="view-toggle">
+            <label>数据视图:</label>
+            <div class="btn-group">
+                <button id="dailyBtn" class="btn inactive">日收集水</button>
+                <button id="monthlyBtn" class="btn active">月收集水</button>
+                <button id="yearlyBtn" class="btn inactive">年收集水</button>
+            </div>
+        </div>
+        
+        <div class="sensor-panel">
+            <div class="sensor-card">
+                <div class="sensor-title">温度 (DHT11)</div>
+                <div class="sensor-value" id="tempValue">24.5</div>
+                <div class="sensor-unit">°C</div>
+            </div>
+            <div class="sensor-card">
+                <div class="sensor-title">湿度 (DHT11)</div>
+                <div class="sensor-value" id="humidityValue">65.2</div>
+                <div class="sensor-unit">%</div>
+            </div>
+            <div class="sensor-card">
+                <div class="sensor-title">pH 值</div>
+                <div class="sensor-value" id="phValue">7.2</div>
+                <div class="sensor-unit"></div>
+            </div>
+            <div class="sensor-card">
+                <div class="sensor-title">TDS (总溶解固体)</div>
+                <div class="sensor-value" id="tdsValue">180</div>
+                <div class="sensor-unit">ppm</div>
+            </div>
+            <div class="sensor-card">
+                <div class="sensor-title">浊度</div>
+                <div class="sensor-value" id="turbidityValue">3.2</div>
+                <div class="sensor-unit">NTU</div>
+            </div>
+            <div class="sensor-card">
+                <div class="sensor-title">SMS 警报</div>
+                <div class="sensor-value" id="smsValue">正常</div>
+                <div class="sensor-unit"></div>
+            </div>
+        </div>
+        
+        <div class="info-box">
+            <h3>设备信息</h3>
+            <p><strong>当前设备：</strong><span id="currentDevice">设备 #1</span></p>
+            <p><strong>收集效率：</strong>95% (基于设备收集面积与降水分布)</p>
+            <p><strong>数据来源：</strong>模拟北京2025年6月降水数据</p>
+            <p><strong>收集面积：</strong>1平方米</p>
+            <p><strong>水泵状态：</strong><span id="pumpStatusText">关闭</span></p>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="color-box precipitation-color"></div>
+                <span>降水量 (L/m²)</span>
+            </div>
+            <div class="legend-item">
+                <div class="color-box collection-color"></div>
+                <span>收集雨水量 (L/m²)</span>
+            </div>
+        </div>
+        
+        <div id="chart" class="chart-container">
+            <div class="y-axis-label">水量 (L/m²)</div>
+            <div id="chart-content" class="chart"></div>
+            <div id="tooltip" class="tooltip"></div>
+        </div>
+        
+        <div class="info-box">
+            <h3>统计摘要</h3>
+            <p><strong>总降水量：</strong><span id="total-precipitation">0</span> L/m²</p>
+            <p><strong>总收集量：</strong><span id="total-collection">0</span> L/m²</p>
+            <p><strong>平均日收集量：</strong><span id="avg-collection">0</span> L/m²</p>
+            <p><strong>最大单日收集量：</strong><span id="max-collection">0</span> L/m² (6月<span id="max-day">0</span>日)</p>
+        </div>
     </div>
-  </div>
 
-  <div class="card">
-    <h2 class="lang-en">Water Saving Data</h2>
-    <h2 class="lang-cn" style="display:none">节水数据</h2>
+    <script>
+        // 设备数据
+        const devices = {
+            device1: {
+                name: "设备 #1",
+                area: "收集区 A",
+                precipitation: [
+                    0.2, 0.0, 0.5, 1.2, 0.8, 0.0, 0.0, 2.5, 5.1, 8.3,
+                    12.7, 18.9, 22.4, 15.6, 8.9, 3.2, 0.5, 0.0, 0.0, 1.8,
+                    4.5, 9.2, 15.8, 20.1, 25.3, 18.7, 12.4, 6.8, 2.1, 0.9
+                ],
+                monthlyPrecipitation: [
+                    15.2, 18.7, 22.1, 45.3, 68.9, 95.2, 78.4, 52.6, 31.8, 19.4, 12.3, 8.7
+                ],
+                yearlyPrecipitation: [210.8, 245.3, 298.7, 367.4, 425.1, 512.8, 487.3, 415.6, 327.4, 268.9, 205.4, 182.1]
+            },
+            device2: {
+                name: "设备 #2",
+                area: "收集区 B",
+                precipitation: [
+                    0.1, 0.0, 0.3, 0.9, 0.6, 0.0, 0.0, 1.8, 3.7, 6.1,
+                    9.4, 14.2, 16.8, 11.7, 6.7, 2.4, 0.4, 0.0, 0.0, 1.3,
+                    3.4, 6.9, 11.8, 15.1, 19.0, 14.0, 9.3, 5.1, 1.6, 0.7
+                ],
+                monthlyPrecipitation: [
+                    12.8, 15.4, 19.2, 38.7, 58.2, 82.1, 67.3, 44.2, 26.9, 16.8, 10.5, 7.2
+                ],
+                yearlyPrecipitation: [185.2, 218.7, 245.3, 312.8, 367.4, 425.1, 398.7, 352.4, 289.1, 234.6, 187.3, 165.8]
+            },
+            device3: {
+                name: "设备 #3",
+                area: "收集区 C",
+                precipitation: [
+                    0.3, 0.0, 0.7, 1.5, 1.0, 0.0, 0.0, 3.2, 6.5, 10.5,
+                    16.0, 23.6, 28.0, 19.5, 11.2, 4.0, 0.6, 0.0, 0.0, 2.3,
+                    5.6, 11.5, 19.8, 25.1, 31.6, 23.4, 15.5, 8.5, 2.6, 1.1
+                ],
+                monthlyPrecipitation: [
+                    18.5, 22.1, 25.8, 52.1, 75.4, 108.7, 89.6, 59.8, 37.4, 23.1, 15.7, 11.3
+                ],
+                yearlyPrecipitation: [245.7, 289.3, 327.8, 398.4, 456.7, 543.2, 512.4, 427.8, 356.9, 298.4, 245.1, 218.7]
+            }
+        };
 
-    <div class="tabs">
-      <button class="active" onclick="drawYear()">2025</button>
-      <button onclick="drawMonth()">Jan</button>
-      <button onclick="drawMonth()">Feb</button>
-      <button onclick="drawMonth()">Mar</button>
-      <button onclick="drawMonth()">Apr</button>
-      <button onclick="drawMonth()">May</button>
-      <button onclick="drawMonth()">Jun</button>
-    </div>
+        // 当前设备
+        let currentDeviceId = 'device1';
+        let pumpOn = false;
+        let currentView = 'monthly'; // 'daily', 'monthly', or 'yearly'
+        let currentYear = 2025;
+        let currentMonth = 6;
 
-    <canvas id="chart"></canvas>
-  </div>
+        // 生成2025年6月的日期数据
+        const days = [];
+        for (let i = 1; i <= 30; i++) {
+            days.push(i);
+        }
 
-  <button class="device-btn" onclick="goBack()">← Back</button>
+        // 月份名称
+        const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
 
-</section>
+        // 年份（过去12年）
+        const years = [];
+        for (let i = 2014; i <= 2025; i++) {
+            years.push(i);
+        }
 
-</main>
+        // 初始化传感器数据
+        let sensorData = {
+            temperature: 24.5,
+            humidity: 65.2,
+            ph: 7.2,
+            tds: 180,
+            turbidity: 3.2,
+            sms: "正常"
+        };
 
-<script>
-let isLight = false;
-let isCN = false;
+        // 更新传感器读数
+        function updateSensors() {
+            // 模拟传感器数据变化
+            sensorData.temperature = (23 + Math.random() * 5).toFixed(1);
+            sensorData.humidity = (60 + Math.random() * 15).toFixed(1);
+            sensorData.ph = (6.8 + Math.random() * 0.8).toFixed(1);
+            sensorData.tds = Math.floor(150 + Math.random() * 100);
+            sensorData.turbidity = (2.5 + Math.random() * 2).toFixed(1);
+            
+            // 随机生成SMS状态
+            const smsStatuses = ["正常", "正常", "正常", "正常", "警报"];
+            sensorData.sms = smsStatuses[Math.floor(Math.random() * smsStatuses.length)];
+            
+            // 更新显示
+            document.getElementById('tempValue').textContent = sensorData.temperature;
+            document.getElementById('humidityValue').textContent = sensorData.humidity;
+            document.getElementById('phValue').textContent = sensorData.ph;
+            document.getElementById('tdsValue').textContent = sensorData.tds;
+            document.getElementById('turbidityValue').textContent = sensorData.turbidity;
+            document.getElementById('smsValue').textContent = sensorData.sms;
+            
+            // 根据SMS状态改变颜色
+            const smsElement = document.getElementById('smsValue');
+            if (sensorData.sms === "警报") {
+                smsElement.style.color = "#f44336";
+            } else {
+                smsElement.style.color = "#6096ba";
+            }
+        }
 
-function toggleTheme(){
-  isLight = !isLight;
-  document.body.classList.toggle("light", isLight);
-}
+        // 更新图表
+        function updateChart() {
+            const device = devices[currentDeviceId];
+            
+            if (currentView === 'daily') {
+                // 使用日数据
+                const precipitation = device.precipitation;
+                const collection = precipitation.map(p => (p * 0.95).toFixed(2)); // 95%收集效率
 
-function toggleLang(){
-  isCN = !isCN;
-  document.querySelectorAll(".lang-en").forEach(e=>e.style.display = isCN?"none":"block");
-  document.querySelectorAll(".lang-cn").forEach(e=>e.style.display = isCN?"block":"none");
-}
+                // 计算统计数据
+                const totalPrecipitation = precipitation.reduce((a, b) => a + b, 0).toFixed(2);
+                const totalCollection = collection.reduce((a, b) => parseFloat(a) + parseFloat(b), 0).toFixed(2);
+                const avgCollection = (parseFloat(totalCollection) / days.length).toFixed(2);
+                
+                // 找到最大收集量及对应日期
+                let maxCollection = 0;
+                let maxDay = 0;
+                for (let i = 0; i < collection.length; i++) {
+                    if (parseFloat(collection[i]) > parseFloat(maxCollection)) {
+                        maxCollection = collection[i];
+                        maxDay = days[i];
+                    }
+                }
 
-function openDevice(){
-  document.getElementById("home").style.display="none";
-  document.getElementById("device").style.display="block";
-  drawYear();
-}
+                // 更新统计摘要
+                document.getElementById('total-precipitation').textContent = totalPrecipitation;
+                document.getElementById('total-collection').textContent = totalCollection;
+                document.getElementById('avg-collection').textContent = avgCollection;
+                document.getElementById('max-collection').textContent = maxCollection;
+                document.getElementById('max-day').textContent = maxDay;
 
-function goBack(){
-  document.getElementById("device").style.display="none";
-  document.getElementById("home").style.display="block";
-}
+                // 更新图表
+                drawChart(precipitation, collection, days, '日');
+                
+                // 更新面包屑
+                document.getElementById('yearBreadcrumb').textContent = currentYear + '年';
+                document.getElementById('monthBreadcrumb').textContent = currentMonth + '月';
+                document.getElementById('dayBreadcrumb').textContent = '日视图';
+            } else if (currentView === 'monthly') {
+                // 使用月数据
+                const precipitation = device.monthlyPrecipitation;
+                const collection = precipitation.map(p => (p * 0.95).toFixed(2)); // 95%收集效率
 
-const canvas = document.getElementById("chart");
-const ctx = canvas.getContext("2d");
+                // 计算统计数据
+                const totalPrecipitation = precipitation.reduce((a, b) => a + b, 0).toFixed(2);
+                const totalCollection = collection.reduce((a, b) => parseFloat(a) + parseFloat(b), 0).toFixed(2);
+                const avgCollection = (parseFloat(totalCollection) / months.length).toFixed(2);
+                
+                // 找到最大收集量及对应月份
+                let maxCollection = 0;
+                let maxMonth = 0;
+                for (let i = 0; i < collection.length; i++) {
+                    if (parseFloat(collection[i]) > parseFloat(maxCollection)) {
+                        maxCollection = collection[i];
+                        maxMonth = i + 1;
+                    }
+                }
 
-function drawAxes(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.strokeStyle = "#555";
-  ctx.beginPath();
-  ctx.moveTo(40,20);
-  ctx.lineTo(40,200);
-  ctx.lineTo(300,200);
-  ctx.stroke();
-}
+                // 更新统计摘要
+                document.getElementById('total-precipitation').textContent = totalPrecipitation;
+                document.getElementById('total-collection').textContent = totalCollection;
+                document.getElementById('avg-collection').textContent = avgCollection;
+                document.getElementById('max-collection').textContent = maxCollection;
+                document.getElementById('max-day').textContent = maxMonth; // 显示月份而不是日期
 
-function drawYear(){
-  drawAxes();
-  const data=[120,180,90,210,160,200,140,100,80,60,40,30];
-  ctx.strokeStyle="#9ad1b3";
-  ctx.beginPath();
-  data.forEach((v,i)=>{
-    const x=40+i*20;
-    const y=200-v/2;
-    if(i===0) ctx.moveTo(x,y);
-    else ctx.lineTo(x,y);
-    ctx.arc(x,y,3,0,Math.PI*2);
-  });
-  ctx.stroke();
-}
+                // 更新图表
+                drawChart(precipitation, collection, months, '月');
+                
+                // 更新面包屑
+                document.getElementById('yearBreadcrumb').textContent = currentYear + '年';
+                document.getElementById('monthBreadcrumb').textContent = currentMonth + '月';
+                document.getElementById('dayBreadcrumb').textContent = '月视图';
+            } else {
+                // 使用年数据
+                const precipitation = device.yearlyPrecipitation;
+                const collection = precipitation.map(p => (p * 0.95).toFixed(2)); // 95%收集效率
 
-function drawMonth(){
-  drawAxes();
-  const data=[0,40,120,60,180,140,90];
-  ctx.strokeStyle="#9ad1b3";
-  ctx.beginPath();
-  data.forEach((v,i)=>{
-    const x=40+i*35;
-    const y=200-v;
-    if(i===0) ctx.moveTo(x,y);
-    else ctx.lineTo(x,y);
-    ctx.arc(x,y,3,0,Math.PI*2);
-  });
-  ctx.stroke();
-}
-</script>
+                // 计算统计数据
+                const totalPrecipitation = precipitation.reduce((a, b) => a + b, 0).toFixed(2);
+                const totalCollection = collection.reduce((a, b) => parseFloat(a) + parseFloat(b), 0).toFixed(2);
+                const avgCollection = (parseFloat(totalCollection) / years.length).toFixed(2);
+                
+                // 找到最大收集量及对应年份
+                let maxCollection = 0;
+                let maxYear = 0;
+                for (let i = 0; i < collection.length; i++) {
+                    if (parseFloat(collection[i]) > parseFloat(maxCollection)) {
+                        maxCollection = collection[i];
+                        maxYear = years[i];
+                    }
+                }
 
+                // 更新统计摘要
+                document.getElementById('total-precipitation').textContent = totalPrecipitation;
+                document.getElementById('total-collection').textContent = totalCollection;
+                document.getElementById('avg-collection').textContent = avgCollection;
+                document.getElementById('max-collection').textContent = maxCollection;
+                document.getElementById('max-day').textContent = maxYear; // 显示年份
+
+                // 更新图表
+                drawChart(precipitation, collection, years, '年');
+                
+                // 更新面包屑
+                document.getElementById('yearBreadcrumb').textContent = currentYear + '年';
+                document.getElementById('monthBreadcrumb').textContent = '年视图';
+                document.getElementById('dayBreadcrumb').textContent = '年视图';
+            }
+        }
+
+        // 绘制柱状图
+        function drawChart(precipitation, collection, labels, labelUnit) {
+            const chartContainer = document.getElementById('chart-content');
+            chartContainer.innerHTML = '';
+            
+            // 计算最大值用于比例缩放
+            const maxPrecip = Math.max(...precipitation);
+            const maxCollectionNum = Math.max(...collection.map(Number));
+            const maxValue = Math.max(maxPrecip, maxCollectionNum);
+            const maxDisplayValue = Math.ceil(maxValue); // 向上取整用于Y轴刻度
+            
+            // 设置图表尺寸参数
+            const containerWidth = chartContainer.clientWidth;
+            const containerHeight = chartContainer.clientHeight - 50; // 预留底部标签空间
+            const barWidth = Math.min(15, containerWidth / (labels.length * 2.5)); // 每组两个柱子
+            const spacing = barWidth * 0.5;
+            const yAxisWidth = 40; // Y轴标签宽度
+            
+            // 创建图表容器
+            const svgNS = "http://www.w3.org/2000/svg";
+            const svg = document.createElementNS(svgNS, "svg");
+            svg.setAttribute("width", containerWidth);
+            svg.setAttribute("height", containerHeight);
+            svg.setAttribute("viewBox", `0 0 ${containerWidth} ${containerHeight}`);
+            svg.style.backgroundColor = "#1b263b";
+            
+            // 绘制Y轴刻度线和标签
+            const numTicks = Math.min(10, maxDisplayValue + 1); // 最多10个刻度
+            const tickSpacing = containerHeight * 0.8 / numTicks;
+            
+            for (let i = 0; i <= numTicks; i++) {
+                const value = (maxDisplayValue * i / numTicks).toFixed(1);
+                const y = containerHeight - 30 - (i * tickSpacing);
+                
+                // 刻度线
+                const tickLine = document.createElementNS(svgNS, "line");
+                tickLine.setAttribute("x1", yAxisWidth);
+                tickLine.setAttribute("y1", y);
+                tickLine.setAttribute("x2", containerWidth);
+                tickLine.setAttribute("y2", y);
+                tickLine.setAttribute("stroke", "#415a77");
+                tickLine.setAttribute("stroke-width", "1");
+                svg.appendChild(tickLine);
+                
+                // 刻度标签
+                const tickLabel = document.createElementNS(svgNS, "text");
+                tickLabel.setAttribute("x", 35);
+                tickLabel.setAttribute("y", y + 4);
+                tickLabel.setAttribute("text-anchor", "end");
+                tickLabel.setAttribute("font-size", "10");
+                tickLabel.setAttribute("fill", "#e0e1dd");
+                tickLabel.textContent = value;
+                svg.appendChild(tickLabel);
+            }
+            
+            // 绘制柱子
+            for (let i = 0; i < labels.length; i++) {
+                const x = (i * (barWidth * 2 + spacing)) + yAxisWidth + 10; // 左边距包括Y轴宽度
+                
+                // 降水柱子 (L/m²)
+                const precipHeight = (precipitation[i] / maxDisplayValue) * (containerHeight * 0.8);
+                const precipBar = document.createElementNS(svgNS, "rect");
+                precipBar.setAttribute("x", x);
+                precipBar.setAttribute("y", containerHeight - precipHeight - 30);
+                precipBar.setAttribute("width", barWidth);
+                precipBar.setAttribute("height", precipHeight);
+                precipBar.setAttribute("fill", "#2196f3");
+                precipBar.setAttribute("class", "bar");
+                precipBar.setAttribute("data-label", labels[i]);
+                precipBar.setAttribute("data-type", "precipitation");
+                precipBar.setAttribute("data-value", precipitation[i]);
+                
+                // 收集量柱子 (L/m²)
+                const collectionHeight = (collection[i] / maxDisplayValue) * (containerHeight * 0.8);
+                const collectionBar = document.createElementNS(svgNS, "rect");
+                collectionBar.setAttribute("x", x + barWidth + spacing/2);
+                collectionBar.setAttribute("y", containerHeight - collectionHeight - 30);
+                collectionBar.setAttribute("width", barWidth);
+                collectionBar.setAttribute("height", collectionHeight);
+                collectionBar.setAttribute("fill", "#4caf50");
+                collectionBar.setAttribute("class", "bar");
+                collectionBar.setAttribute("data-label", labels[i]);
+                collectionBar.setAttribute("data-type", "collection");
+                collectionBar.setAttribute("data-value", collection[i]);
+                
+                // 添加到SVG
+                svg.appendChild(precipBar);
+                svg.appendChild(collectionBar);
+                
+                // 添加标签
+                const text = document.createElementNS(svgNS, "text");
+                text.setAttribute("x", x + barWidth);
+                text.setAttribute("y", containerHeight - 10);
+                text.setAttribute("text-anchor", "middle");
+                text.setAttribute("font-size", "10");
+                text.setAttribute("fill", "#e0e1dd");
+                text.textContent = labels[i];
+                svg.appendChild(text);
+            }
+            
+            chartContainer.appendChild(svg);
+            
+            // 添加交互事件
+            addInteraction(labelUnit);
+        }
+
+        // 添加交互功能
+        function addInteraction(labelUnit) {
+            const bars = document.querySelectorAll('.bar');
+            const tooltip = document.getElementById('tooltip');
+            
+            bars.forEach(bar => {
+                bar.addEventListener('mouseover', function(e) {
+                    const label = this.getAttribute('data-label');
+                    const type = this.getAttribute('data-type');
+                    const value = this.getAttribute('data-value');
+                    
+                    let typeText = type === 'precipitation' ? '降水量' : '收集量';
+                    let unit = type === 'precipitation' ? 'L/m²' : 'L/m²';
+                    let labelDisplay = labelUnit === '日' ? `${label}日` : label;
+                    
+                    tooltip.innerHTML = `${labelDisplay}<br>${typeText}: ${value} ${unit}`;
+                    tooltip.style.display = 'block';
+                    
+                    // 更新tooltip位置
+                    updateTooltipPosition(e);
+                });
+                
+                bar.addEventListener('mousemove', function(e) {
+                    updateTooltipPosition(e);
+                });
+                
+                bar.addEventListener('mouseout', function() {
+                    tooltip.style.display = 'none';
+                });
+            });
+        }
+
+        // 更新工具提示位置
+        function updateTooltipPosition(e) {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.style.left = e.pageX + 10 + 'px';
+            tooltip.style.top = e.pageY - 10 + 'px';
+        }
+
+        // 切换设备
+        function switchDevice(deviceId) {
+            currentDeviceId = deviceId;
+            const device = devices[deviceId];
+            document.getElementById('currentDevice').textContent = `${device.name} (${device.area})`;
+            updateChart();
+        }
+
+        // 切换水泵
+        function togglePump() {
+            pumpOn = !pumpOn;
+            const pumpStatus = document.getElementById('pumpStatus');
+            const pumpStatusText = document.getElementById('pumpStatusText');
+            
+            if (pumpOn) {
+                pumpStatus.className = 'status-indicator status-on';
+                pumpStatusText.textContent = '开启';
+            } else {
+                pumpStatus.className = 'status-indicator status-off';
+                pumpStatusText.textContent = '关闭';
+            }
+        }
+
+        // 切换视图
+        function switchView(view) {
+            currentView = view;
+            
+            // 更新按钮样式
+            const dailyBtn = document.getElementById('dailyBtn');
+            const monthlyBtn = document.getElementById('monthlyBtn');
+            const yearlyBtn = document.getElementById('yearlyBtn');
+            
+            if (view === 'daily') {
+                dailyBtn.className = 'btn active';
+                monthlyBtn.className = 'btn inactive';
+                yearlyBtn.className = 'btn inactive';
+                document.querySelector('.info-box p:nth-child(5)').innerHTML = `<strong>最大单日收集量：</strong><span id="max-collection">0</span> L/m² (6月<span id="max-day">0</span>日)`;
+            } else if (view === 'monthly') {
+                dailyBtn.className = 'btn inactive';
+                monthlyBtn.className = 'btn active';
+                yearlyBtn.className = 'btn inactive';
+                document.querySelector('.info-box p:nth-child(5)').innerHTML = `<strong>最大月收集量：</strong><span id="max-collection">0</span> L/m² (<span id="max-day">0</span>月)`;
+            } else {
+                dailyBtn.className = 'btn inactive';
+                monthlyBtn.className = 'btn inactive';
+                yearlyBtn.className = 'btn active';
+                document.querySelector('.info-box p:nth-child(5)').innerHTML = `<strong>最大年收集量：</strong><span id="max-collection">0</span> L/m² (<span id="max-day">0</span>年)`;
+            }
+            
+            updateChart();
+        }
+
+        // 面包屑点击事件
+        document.getElementById('yearBreadcrumb').addEventListener('click', function() {
+            switchView('yearly');
+            this.classList.add('active');
+            document.getElementById('monthBreadcrumb').classList.remove('active');
+            document.getElementById('dayBreadcrumb').classList.remove('active');
+        });
+
+        document.getElementById('monthBreadcrumb').addEventListener('click', function() {
+            if (currentView !== 'monthly') {
+                switchView('monthly');
+                document.getElementById('yearBreadcrumb').classList.add('active');
+                this.classList.add('active');
+                document.getElementById('dayBreadcrumb').classList.remove('active');
+            }
+        });
+
+        document.getElementById('dayBreadcrumb').addEventListener('click', function() {
+            if (currentView === 'yearly') {
+                // 从年视图点击进入月视图
+                switchView('monthly');
+                document.getElementById('yearBreadcrumb').classList.add('active');
+                document.getElementById('monthBreadcrumb').classList.add('active');
+                this.classList.remove('active');
+            } else if (currentView === 'monthly') {
+                // 从月视图点击进入日视图
+                switchView('daily');
+                document.getElementById('yearBreadcrumb').classList.add('active');
+                document.getElementById('monthBreadcrumb').classList.add('active');
+                this.classList.add('active');
+            }
+        });
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置设备选择器事件
+            document.getElementById('deviceSelect').addEventListener('change', function() {
+                switchDevice(this.value);
+            });
+            
+            // 设置水泵开关事件
+            document.getElementById('pumpSwitch').addEventListener('change', togglePump);
+            
+            // 设置视图切换按钮事件
+            document.getElementById('dailyBtn').addEventListener('click', function() {
+                switchView('daily');
+                document.getElementById('yearBreadcrumb').classList.add('active');
+                document.getElementById('monthBreadcrumb').classList.add('active');
+                document.getElementById('dayBreadcrumb').classList.add('active');
+            });
+            
+            document.getElementById('monthlyBtn').addEventListener('click', function() {
+                switchView('monthly');
+                document.getElementById('yearBreadcrumb').classList.add('active');
+                document.getElementById('monthBreadcrumb').classList.add('active');
+                document.getElementById('dayBreadcrumb').classList.remove('active');
+            });
+            
+            document.getElementById('yearlyBtn').addEventListener('click', function() {
+                switchView('yearly');
+                document.getElementById('yearBreadcrumb').classList.add('active');
+                document.getElementById('monthBreadcrumb').classList.remove('active');
+                document.getElementById('dayBreadcrumb').classList.remove('active');
+            });
+            
+            // 初始化图表
+            updateChart();
+            
+            // 每2秒更新传感器数据
+            setInterval(updateSensors, 2000);
+            
+            // 每5秒更新图表（模拟实时数据变化）
+            setInterval(updateChart, 5000);
+        });
+    </script>
 </body>
 </html>
